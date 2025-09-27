@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Penyimpanan File Bot SV</title>
+<style>
+    /* === FONT & BASE === */
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap');
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        font-family: 'Orbitron', sans-serif;
+        background: radial-gradient(circle at top, #0f2027, #203a43, #2c5364);
+        color: #f5f5f5;
+        min-height: 100vh;
+        padding: 30px;
+    }
+
+    h1 {
+        text-align: center;
+        font-size: 2.5rem;
+        color: #00f5ff;
+        text-shadow: 0 0 10px #00f5ff, 0 0 20px #00f5ff;
+        margin-bottom: 20px;
+    }
+
+    /* Tombol Upload */
+    #uploadBtn {
+        display: block;
+        margin: 0 auto 30px auto;
+        padding: 12px 25px;
+        background: linear-gradient(135deg, #0ff 0%, #06f 100%);
+        color: #000;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        cursor: pointer;
+        box-shadow: 0 0 10px #0ff, 0 0 20px #06f;
+        transition: 0.3s;
+    }
+    #uploadBtn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px #0ff, 0 0 30px #06f;
+    }
+
+    #folder-list, #file-view ul {
+        list-style: none;
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    /* === Folder Button === */
+    #folder-list li {
+        margin-bottom: 15px;
+        text-align: center;
+    }
+    #folder-list a {
+        display: inline-block;
+        padding: 14px 28px;
+        background: linear-gradient(135deg, #0ff 0%, #06f 100%);
+        color: #000;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        box-shadow: 0 0 10px #0ff, 0 0 20px #06f;
+        transition: 0.3s;
+    }
+    #folder-list a:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px #0ff, 0 0 30px #06f;
+    }
+
+    /* === File View === */
+    #file-view {
+        margin-top: 40px;
+        background: rgba(255,255,255,0.05);
+        border: 2px solid rgba(0,255,255,0.2);
+        border-radius: 15px;
+        padding: 25px;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+        box-shadow: 0 0 20px rgba(0,255,255,0.2);
+    }
+    #file-view h2 {
+        text-align: center;
+        color: #0ff;
+        margin-bottom: 20px;
+        text-shadow: 0 0 10px #0ff;
+    }
+    #file-view ul li {
+        padding: 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    #file-view ul li:last-child {
+        border-bottom: none;
+    }
+
+    #file-view a {
+        color: #00f5ff;
+        text-decoration: none;
+        font-weight: 700;
+        transition: 0.3s;
+    }
+    #file-view a:hover {
+        text-shadow: 0 0 8px #0ff;
+    }
+
+    /* Link Kembali */
+    #file-view p a {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #0ff 0%, #06f 100%);
+        color: #000;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    #file-view p a:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 10px #0ff, 0 0 20px #06f;
+    }
+
+    /* === Modal Upload === */
+    #uploadModal {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.7);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+    }
+    #uploadModal.active {
+        display: flex;
+    }
+    .modal-content {
+        background: #203a43;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 0 15px #0ff;
+        width: 320px;
+        text-align: center;
+    }
+    .modal-content h2 {
+        margin-bottom: 20px;
+        color: #0ff;
+        text-shadow: 0 0 8px #0ff;
+    }
+    .modal-content input,
+    .modal-content select {
+        width: 90%;
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 8px;
+        border: none;
+        outline: none;
+    }
+    .modal-content button {
+        margin: 5px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #0ff 0%, #06f 100%);
+        color: #000;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .modal-content button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 10px #0ff;
+    }
+</style>
+</head>
+<body>
+    <div> tempat sv by ikhsan </div>
+    <h1>📱 Storage</h1>
+
+    <!-- Tombol Upload -->
+    <button id="uploadBtn">⬆ Upload File</button>
+
+    <!-- Daftar Folder -->
+    <ul id="folder-list"></ul>
+
+    <!-- View File -->
+    <div id="file-view"></div>
+
+    <!-- Modal Upload -->
+    <div id="uploadModal">
+      <div class="modal-content">
+        <h2>Upload File</h2>
+        <form id="uploadForm" enctype="multipart/form-data">
+          <input type="file" id="fileInput" name="file" required><br>
+          <input type="text" id="fileNameInput" name="filename" placeholder="Nama file tanpa ekstensi" required><br>
+          <select id="folderSelect" name="folder"></select><br>
+          <button type="submit">Upload</button>
+          <button type="button" id="cancelUpload">Batal</button>
+        </form>
+      </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    loadFolders();
+});
+
+async function loadFolders() {
+    try {
+        const response = await fetch('/api/folders');
+        const data = await response.json();
+        const list = document.getElementById('folder-list');
+        const fileView = document.getElementById('file-view');
+        list.innerHTML = '';
+        fileView.innerHTML = '';
+
+        if (data.folders.length === 0) {
+            list.innerHTML = '<li>Tidak ada penyimpanan yang dibuat.</li>';
+            return;
+        }
+
+        data.folders.forEach(folder => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.textContent = folder;
+            a.href = '#';
+            a.onclick = () => loadFiles(folder);
+            li.appendChild(a);
+            list.appendChild(li);
+        });
+
+    } catch (error) {
+        console.error("Gagal memuat folder:", error);
+        document.getElementById('folder-list').innerHTML = '<li>Gagal memuat data.</li>';
+    }
+}
+
+async function loadFiles(penyimpananName) {
+    try {
+        const response = await fetch(`/api/files/${penyimpananName}`);
+        const data = await response.json();
+        const fileView = document.getElementById('file-view');
+
+        let html = `<h2>File di Penyimpanan: ${penyimpananName}</h2>`;
+        if (data.files.length === 0) {
+            html += `<p>Penyimpanan ini kosong.</p>`;
+        } else {
+            html += '<ul>';
+            data.files.forEach(file => {
+                html += `<li>${file.name} - <a href="${file.downloadUrl}" target="_blank">Download</a></li>`;
+            });
+            html += '</ul>';
+        }
+
+        html += '<p><a href="/" onclick="loadFolders(); return false;">⬅ Kembali</a></p>';
+        fileView.innerHTML = html;
+
+    } catch (error) {
+        console.error("Gagal memuat file:", error);
+        document.getElementById('file-view').innerHTML = `<p>Gagal memuat file untuk ${penyimpananName}.</p>`;
+    }
+}
+
+/* === UPLOAD LOGIC === */
+const uploadBtn = document.getElementById('uploadBtn');
+const uploadModal = document.getElementById('uploadModal');
+const fileInput = document.getElementById('fileInput');
+const fileNameInput = document.getElementById('fileNameInput');
+const folderSelect = document.getElementById('folderSelect');
+const cancelUpload = document.getElementById('cancelUpload');
+const uploadForm = document.getElementById('uploadForm');
+
+// Buka modal upload
+uploadBtn.addEventListener('click', async () => {
+    uploadModal.classList.add('active');
+
+    // Muat daftar folder
+    const res = await fetch('/api/folders');
+    const data = await res.json();
+    folderSelect.innerHTML = '';
+    data.folders.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f;
+        opt.textContent = f;
+        folderSelect.appendChild(opt);
+    });
+});
+
+// Tutup modal
+cancelUpload.addEventListener('click', () => {
+    uploadModal.classList.remove('active');
+});
+
+// Deteksi ekstensi otomatis & isi nama
+fileInput.addEventListener('change', () => {
+    if (fileInput.files.length > 0) {
+        const fullName = fileInput.files[0].name;
+        const baseName = fullName.replace(/\.[^/.]+$/, ""); // hapus ekstensi
+        fileNameInput.value = baseName;
+    }
+});
+
+// Upload file
+uploadForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const file = fileInput.files[0];
+    const baseName = fileNameInput.value.trim();
+    const ext = file.name.split('.').pop();
+    const folder = folderSelect.value;
+
+    if (!file || !baseName || !folder) {
+        alert('Lengkapi semua field!');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file, baseName + '.' + ext);
+    formData.append('folder', folder);
+
+    try {
+        const res = await fetch('/api/upload', {
+            method: 'POST',
+            body: formData
+        });
+        if (res.ok) {
+            alert('Upload berhasil!');
+            uploadModal.classList.remove('active');
+            loadFolders();
+        } else {
+            alert('Upload gagal.');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Terjadi kesalahan saat upload.');
+    }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "bot-sv-hall-penting",
+  "version": "1.0.0",
+  "description": "Bot Telegram SV dengan integrasi web UI.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "telegraf": "^4.16.1",        
+    "express": "^4.18.2",         
+    "dotenv": "^16.3.1",           
+    "fs-extra": "^11.2.0",         
+    "multer": "^1.4.5-lts.1",      
+    "axios": "^1.6.5"              
+  }
+}
